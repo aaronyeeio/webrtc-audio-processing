@@ -127,7 +127,7 @@ fn create_stream_settings(
         input_params,
         output_params,
         f64::from(AUDIO_SAMPLE_RATE),
-        NUM_SAMPLES_PER_FRAME as u32,
+        48000 as u32,
     ))
 }
 
@@ -183,6 +183,7 @@ fn main() -> Result<(), Error> {
     let mut processor = Processor::new(&InitializationConfig {
         num_capture_channels: opt.capture.num_channels as i32,
         num_render_channels: opt.render.num_channels as i32,
+        sample_rate_hz: 48000,
         ..Default::default()
     })?;
 
@@ -207,14 +208,13 @@ fn main() -> Result<(), Error> {
 
     let audio_callback = {
         // Allocate buffers outside the performance-sensitive audio loop.
-        let mut input_mut =
-            vec![0f32; NUM_SAMPLES_PER_FRAME as usize * opt.capture.num_channels as usize];
+        let mut input_mut = vec![0f32; 48000 as usize * opt.capture.num_channels as usize];
 
         let running = running.clone();
         let mute = opt.render.mute;
         let mut processor = processor.clone();
         move |portaudio::DuplexStreamCallbackArgs { in_buffer, out_buffer, frames, .. }| {
-            assert_eq!(frames, NUM_SAMPLES_PER_FRAME as usize);
+            assert_eq!(frames, 48000 as usize);
 
             let mut should_continue = true;
 

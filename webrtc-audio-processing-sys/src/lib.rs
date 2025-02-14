@@ -152,6 +152,7 @@ mod tests {
     #[test]
     fn test_process() {
         unsafe {
+            let sample_rate_hz = 48000;
             let mut error = 0;
             let ap = audio_processing_create(&init_config_with_all_enabled(), &mut error);
             assert!(!ap.is_null());
@@ -160,7 +161,7 @@ mod tests {
             let config = config_with_all_enabled();
             set_config(ap, &config);
 
-            let mut frame = vec![vec![0f32; NUM_SAMPLES_PER_FRAME as usize]; 1];
+            let mut frame = vec![vec![0f32; sample_rate_hz * FRAME_MS / 1000 as usize]; 1];
             let mut frame_ptr = frame.iter_mut().map(|v| v.as_mut_ptr()).collect::<Vec<*mut f32>>();
             assert!(is_success(process_render_frame(ap, frame_ptr.as_mut_ptr())));
             assert!(is_success(process_capture_frame(ap, frame_ptr.as_mut_ptr())));
@@ -203,6 +204,7 @@ mod tests {
     #[test]
     fn test_some_stats() {
         unsafe {
+            let sample_rate_hz = 48000;
             let mut error = 0;
             let ap = audio_processing_create(&init_config_with_all_enabled(), &mut error);
             assert!(!ap.is_null());
@@ -211,7 +213,7 @@ mod tests {
             let config = config_with_all_enabled();
             set_config(ap, &config);
 
-            let mut frame = vec![vec![0f32; NUM_SAMPLES_PER_FRAME as usize]; 1];
+            let mut frame = vec![vec![0f32; sample_rate_hz * FRAME_MS / 1000 as usize]; 1];
             let mut frame_ptr = frame.iter_mut().map(|v| v.as_mut_ptr()).collect::<Vec<*mut f32>>();
             assert!(is_success(process_render_frame(ap, frame_ptr.as_mut_ptr())));
             assert!(is_success(process_capture_frame(ap, frame_ptr.as_mut_ptr())));

@@ -11,7 +11,7 @@ use std::{error, fmt, sync::Arc};
 use webrtc_audio_processing_sys as ffi;
 
 pub use config::*;
-pub use ffi::NUM_SAMPLES_PER_FRAME;
+pub use ffi::FRAME_MS;
 
 /// Represents an error inside webrtc::AudioProcessing.
 /// See the documentation of [`webrtc::AudioProcessing::Error`](https://cgit.freedesktop.org/pulseaudio/webrtc-audio-processing/tree/webrtc/modules/audio_processing/include/audio_processing.h?id=9def8cf10d3c97640d32f1328535e881288f700f)
@@ -48,14 +48,15 @@ impl Processor {
     /// instantiation, however new configs can be be passed to `set_config()`
     /// at any time during processing.
     pub fn new(config: &ffi::InitializationConfig) -> Result<Self, Error> {
+        let num_samples_per_frame = config.sample_rate_hz * FRAME_MS / 1000;
         Ok(Self {
             inner: Arc::new(AudioProcessing::new(config)?),
             deinterleaved_capture_frame: vec![
-                vec![0f32; NUM_SAMPLES_PER_FRAME as usize];
+                vec![0f32; num_samples_per_frame as usize];
                 config.num_capture_channels as usize
             ],
             deinterleaved_render_frame: vec![
-                vec![0f32; NUM_SAMPLES_PER_FRAME as usize];
+                vec![0f32; num_samples_per_frame as usize];
                 config.num_render_channels as usize
             ],
         })
@@ -282,7 +283,8 @@ mod tests {
     }
 
     fn sample_stereo_frames() -> (Vec<f32>, Vec<f32>) {
-        let num_samples_per_frame = NUM_SAMPLES_PER_FRAME as usize;
+        let sample_rate_hz = 48000;
+        let num_samples_per_frame = sample_rate_hz * FRAME_MS / 1000 as usize;
 
         // Stereo frame with a lower frequency cosine wave.
         let mut render_frame = Vec::with_capacity(num_samples_per_frame * 2);
@@ -412,8 +414,8 @@ mod tests {
             ..InitializationConfig::default()
         };
         let mut ap = Processor::new(&config).unwrap();
-        
-        // tweak params outside of config 
+
+        // tweak params outside of config
         ap.set_output_will_be_muted(true);
         ap.set_stream_key_pressed(true);
 
@@ -427,5 +429,4 @@ mod tests {
 
         // it shouldn't crash
     }
-
 }

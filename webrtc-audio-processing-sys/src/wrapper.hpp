@@ -6,15 +6,8 @@
 
 namespace webrtc_audio_processing {
 
-// AudioProcessing accepts only one of 48000, 32000, 16000, and 8000 hz.
-// TODO: support multiple sample rates.
-const int SAMPLE_RATE_HZ = 48000;
-
 // AudioProcessing expects each frame to be of fixed 10 ms.
 const int FRAME_MS = 10;
-
-/// <div rustbindgen>The number of expected samples per frame.</div>
-const int NUM_SAMPLES_PER_FRAME = SAMPLE_RATE_HZ * FRAME_MS / 1000;
 
 struct AudioProcessing;
 
@@ -37,6 +30,8 @@ struct OptionalBool {
 struct InitializationConfig {
   int num_capture_channels;
   int num_render_channels;
+  // AudioProcessing accepts only one of 48000, 32000, 16000, and 8000 hz.
+  int sample_rate_hz;
 
   // TODO: Investigate how it's different from the default gain control and the effect of using the two at the same time.
   bool enable_experimental_agc;
